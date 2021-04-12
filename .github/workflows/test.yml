@@ -1,0 +1,153 @@
+name: All Tests
+on: # rebuild any PRs and main branch changes
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'releases/*'
+
+jobs:
+  code-format: 
+    name: Test code format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          npm install
+      - run: |
+          npm run all
+  test:
+    name: Test Functionality
+    runs-on: ubuntu-latest
+    services:
+      nginx:
+        image: nginxdemos/hello:plain-text
+    steps:
+      - uses: actions/checkout@v2
+      - name: Copy test.sh to executable path
+        run: |
+          mkdir -p ~/.local/bin
+          cp ./tests/test.sh ~/.local/bin/test.sh
+
+      - name: "Test: Run a command in a public image"
+        id: test-simple
+        uses: ./
+        with:
+          image: ubuntu:latest
+          run: echo "::set-output name=success::true"
+      - name: "Validate Test: Run a command in a public image"
+        run: test.sh equal   "${{ steps.test-simple.outputs.success }}"   "true"
+
+      - name: "Test: Multline script with defaults settings"
+        id: test-defaults
+        uses: ./
+        with:
+          image: ubuntu:latest
+          run: |
+            # prepare...
+            apt-get update && apt-get install -y iputils-ping
+            # check if the script is running in default "sh" (which is dash in ubuntu)
+            [ ! -z "${BASH_VERSION}" ] && echo "ERROR: Shell is not sh" && exit 1
+            # check if the default workdir ("/") is used
+            echo "Workdir is: ${PWD}"
+            [ "${PWD}" != "/" ] && echo "ERROR: Workdir is not /" && exit 1
+            # check if the container is attached to the local docker network:
+            ping -c 1 nginx
+            
+
+      - name: "Test: Multiline run fails on error (should have error)"
+        continue-on-error: true
+        id: test-multiline-with-error
+        uses: ./
+        with:
+          image: ubuntu:latest
+          run: |
+            echo "start"
+            echo "::set-output name=beforeError::true"
+            cat non-existing-file
+            echo "::set-output name=afterError::true"
+            echo "end"
+      - name: "Validate Test: Multiline run fails on error"
+        run: |
+          test.sh equal   "${{ steps.test-multiline-with-error.outputs.beforeError }}"   "true"
+          test.sh empty   "${{ steps.test-multiline-with-error.outputs.afterError }}"
+
+      - name: "Test: Shell input"
+        id: test-shell-input
+        uses: ./
+        with:
+          image: ubuntu:latest
+          shell: /bin/bash
+          run: echo "::set-output name=bash-version::${BASH_VERSION}"
+      - name: "Validate Test: Shell input"
+        run: test.sh not-empty   "${{ steps.test-shell-input.outputs.bash-version }}"
+
+      - name: "Test: Env input"
+        id: test-env-input
+        uses: ./
+        with:
+          image: ubuntu:latest
+          environment: |
+            GITHUB_JOB
+            CUSTOM_VAR=foo
+          run: |
+            echo "::set-output name=github-job::${GITHUB_JOB}"
+            echo "::set-output name=custom-var::${CUSTOM_VAR}"
+      - name: "Validate Test: Env input"
+        run: |
+          test.sh equal   "${{ steps.test-env-input.outputs.github-job }}"   "${GITHUB_JOB}"
+          test.sh equal   "${{ steps.test-env-input.outputs.custom-var }}"   "foo"
+
+      - name: "Test: Volume input"
+        id: test-volume-input
+        uses: ./
+        with:
+          image: ubuntu:latest
+          volumes: |
+            /home/runner/volume-test:/home-volume-test
+            ${{ github.workspace }}:/workspace
+          run: |
+            echo "present" > /home-volume-test/file1
+            echo "present" > /workspace/file2
+      - name: "Validate Test: Volume input"
+        run: |
+          test.sh equal   $(cat ~/volume-test/file1)   "present"
+          test.sh equal   $(cat ${GITHUB_WORKSPACE}/file2)   "present"
+    
+      - name: "Test: Workdir input"
+        id: test-workdir-input
+        uses: ./
+        with:
+          image: ubuntu:latest
+          workdir: "/var/mywork"
+          run: |
+            echo "present" > /var/mywork/test-file
+            echo "::set-output name=file-content::$(cat ./test-file)"
+      - name: "Validate Test: Workdir input"
+        run: test.sh equal   "${{ steps.test-workdir-input.outputs.file-content }}"   "present"
+
+      - name: "Test: Options input"
+        id: test-options-input
+        uses: ./
+        with:
+          image: ubuntu:latest
+          options: |
+            --name=TestContainer
+            --label test
+            -e TEST_VAR=bar
+          run: echo "::set-output name=test-var::${TEST_VAR}"
+      - name: "Validate Test: Options input"
+        run: test.sh equal   "${{ steps.test-options-input.outputs.test-var }}"   "bar"
+      
+      - name: Authorize docker for private image
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.PAT_FOR_GHCR }}
+      - name: "Test: Can access private image after authorization"
+        id: test-private-image
+        uses: ./
+        with:
+          image: ghcr.io/${{ github.repository }}/private-image:latest
+          run: cat /var/mywork/private-image-test

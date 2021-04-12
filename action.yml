@@ -1,0 +1,34 @@
+name: 'Docker Run'
+description: 'Run a step in a (private) container.'
+author: 'Dominik Kohler'
+inputs:
+  image:
+    required: true
+    description: 'The image to use'
+  run:
+    required: true
+    description: 'The command to run'
+  shell:
+    required: false
+    description: 'Path to shell binary'
+    default: sh
+  default_network:
+    description: 'Docker Network ID'
+    default: ${{ job.container.network }}
+    required: false
+  environment:
+    required: false
+    description: 'Available enviroment variables'
+  volumes:
+    required: false
+    description: 'Custom volume mounts'
+  workdir: 
+    required: false
+    description: "Custom workdir"
+  options:
+    required: false
+    description: 'Additional run options'
+
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

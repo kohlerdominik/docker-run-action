@@ -1,5 +1,8 @@
-name: 'Docker Run'
+name: 'Docker Run Step'
 description: 'Run a step in a (private) container.'
+branding:
+  icon: "terminal"
+  color: "white"
 author: 'Dominik Kohler'
 inputs:
   image:

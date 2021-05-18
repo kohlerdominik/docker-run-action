@@ -49,7 +49,7 @@ See also [Docker Login Action](https://github.com/marketplace/actions/docker-log
     image: application:latest
     run: ./verify-data.sh
 ```
-See alo [Docker Push Action](https://github.com/marketplace/actions/build-and-push-docker-images)
+See also [Docker Push Action](https://github.com/marketplace/actions/build-and-push-docker-images)
 
 ### Customize the action
 ```yaml
@@ -62,7 +62,7 @@ See alo [Docker Push Action](https://github.com/marketplace/actions/build-and-pu
    # change workdir (default directory for the shell)
     workdir: /workspace
    # pass or create environment variables
-    env: |
+    environment: |
       GITHUB_REF
       PREVIOUS_RESULT=${{ steps.step-id.outputs.result }}
       DB_USER=root
@@ -81,7 +81,7 @@ See alo [Docker Push Action](https://github.com/marketplace/actions/build-and-pu
       apt-get install curl
       curl icanhazip.com > /etc/ip.conf
 ```
-Multiline is available for `env`, `volumes`, `options` and `run` inputs, but it's optional. If you have to pass only one argument, or want to chain all arguments on one line, it will work, too.
+Multiline is available for `environment`, `volumes`, `options` and `run` inputs, but it's optional. If you have to pass only one argument, or want to chain all arguments on one line, it will work, too.
 
 # Contributions
 Contributions are very welcome. All functionality is covered with a test, so if you add functionality, please also add a test.

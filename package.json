@@ -1,6 +1,6 @@
 {
   "name": "docker-run-action",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "private": true,
   "description": "Run commands in a docker container.",
   "main": "lib/main.js",

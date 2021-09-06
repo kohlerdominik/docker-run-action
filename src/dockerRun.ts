@@ -5,13 +5,14 @@ import {v4 as uuidv4} from 'uuid'
 import * as input from './input'
 
 export const COMMAND_FILE_NAME = `${uuidv4()}.sh`
-export const LOCAL_COMMAND_PATH = `/home/runner/work/_temp/${COMMAND_FILE_NAME}`
+export const LOCAL_COMMAND_PATH = `${process.env.RUNNER_TEMP}/${COMMAND_FILE_NAME}`
 export const CONTAINER_COMMAND_PATH = `/tmp/${COMMAND_FILE_NAME}`
 
 export async function runContainer(): Promise<void> {
   fs.writeFileSync(LOCAL_COMMAND_PATH, input.get('run'), {mode: 0o755})
   core.info(`
-These instructions are passed to the container:
+Wrote instruction file to "${LOCAL_COMMAND_PATH}"
+with these instructions:
 ----- START OF FILE -----
 ${fs.readFileSync(LOCAL_COMMAND_PATH).toString()}
 ----- END OF FILE -----`)

@@ -42,13 +42,14 @@ const fs = __importStar(__nccwpck_require__(747));
 const uuid_1 = __nccwpck_require__(840);
 const input = __importStar(__nccwpck_require__(657));
 exports.COMMAND_FILE_NAME = `${uuid_1.v4()}.sh`;
-exports.LOCAL_COMMAND_PATH = `/home/runner/work/_temp/${exports.COMMAND_FILE_NAME}`;
+exports.LOCAL_COMMAND_PATH = `${process.env.RUNNER_TEMP}/${exports.COMMAND_FILE_NAME}`;
 exports.CONTAINER_COMMAND_PATH = `/tmp/${exports.COMMAND_FILE_NAME}`;
 function runContainer() {
     return __awaiter(this, void 0, void 0, function* () {
         fs.writeFileSync(exports.LOCAL_COMMAND_PATH, input.get('run'), { mode: 0o755 });
         core.info(`
-These instructions are passed to the container:
+Wrote instruction file to "${exports.LOCAL_COMMAND_PATH}"
+with these instructions:
 ----- START OF FILE -----
 ${fs.readFileSync(exports.LOCAL_COMMAND_PATH).toString()}
 ----- END OF FILE -----`);

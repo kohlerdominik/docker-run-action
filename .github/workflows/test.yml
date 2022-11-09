@@ -11,7 +11,7 @@ jobs:
     name: Test code format
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: |
           npm install
       - run: |
@@ -23,7 +23,7 @@ jobs:
       nginx:
         image: nginxdemos/hello:plain-text
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Copy test.sh to executable path
         run: |
           mkdir -p ~/.local/bin
@@ -140,7 +140,7 @@ jobs:
         run: test.sh equal   "${{ steps.test-options-input.outputs.test-var }}"   "bar"
       
       - name: Authorize docker for private image
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}

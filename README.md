@@ -13,7 +13,7 @@ Run a step in a (private) container.
 
 ### Simple step wrapped in a container
 ```yaml
-- uses: kohlerdominik/docker-run-action@v1
+- uses: kohlerdominik/docker-run-action@v2
   with:
     image: alpine:latest
     run: |
@@ -28,7 +28,7 @@ Run a step in a (private) container.
     registry: ghcr.io
     username: ${{ secrets.MY_USERNAME }}
     password: ${{ secrets.MY_PASSWORD }}
-- uses: kohlerdominik/docker-run-action@v1
+- uses: kohlerdominik/docker-run-action@v2
   with:
     image: ghcr.io/${{ github.repository }}/private-image:latest
     volumes: ${{ github.workspace }}:/workspace
@@ -44,7 +44,7 @@ See also [Docker Login Action](https://github.com/marketplace/actions/docker-log
   with:
     tags: application:latest
     push: false
-- uses: kohlerdominik/docker-run-action@v1
+- uses: kohlerdominik/docker-run-action@v2
   with:
     image: application:latest
     run: ./verify-data.sh
@@ -53,7 +53,7 @@ See also [Docker Push Action](https://github.com/marketplace/actions/build-and-p
 
 ### Use Github Environment Files
 ```yaml
-- uses: kohlerdominik/docker-run-action@v1
+- uses: kohlerdominik/docker-run-action@v2
   with:
     image: ubuntu:latest
     volumes: ${{ github.workspace }}:/workspace
@@ -67,7 +67,7 @@ See also [Environment Files](https://docs.github.com/en/actions/using-workflows/
 
 ### Customize the action
 ```yaml
-- uses: kohlerdominik/docker-run-action@v1
+- uses: kohlerdominik/docker-run-action@v2
   with:
    # public, private or local image
     image: ubuntu:latest

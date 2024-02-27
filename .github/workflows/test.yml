@@ -28,6 +28,10 @@ jobs:
         run: |
           mkdir -p ~/.local/bin
           cp ./tests/test.sh ~/.local/bin/test.sh
+      
+      - run: | 
+          ls -la /home/runner/work/_temp/
+          ls -la /home/runner/work/_temp/_runner_file_commands/
 
       - name: "Test: Run a command in a public image"
         id: test-simple

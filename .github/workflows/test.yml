@@ -29,8 +29,10 @@ jobs:
           mkdir -p ~/.local/bin
           cp ./tests/test.sh ~/.local/bin/test.sh
       
-      - run: | 
+      - run: |
           ls -la /home/runner/work/_temp/
+          ls -la /home/runner/work/_temp/_runner_file_commands/
+          chmod 666 /home/runner/work/_temp/_runner_file_commands/*
           ls -la /home/runner/work/_temp/_runner_file_commands/
 
       - name: "Test: Run a command in a public image"

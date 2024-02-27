@@ -40,24 +40,6 @@ jobs:
       - name: "Validate Test: Run a command in a public image"
         run: test.sh equal   "${{ steps.test-simple.outputs.success }}"   "true"
 
-      - name: "Test: Setting Environment Files (env, output, summary, path)"
-        id: test-runner-env
-        uses: ./
-        with:
-          image: ubuntu:latest
-          run: |
-            echo "test_env=IsSet" >> "$GITHUB_ENV"
-            echo "test_path=/IsSet" >> "$GITHUB_PATH"
-            echo "test_output=IsSet" >> "$GITHUB_OUTPUT"
-            echo "### Step summary worked! :rocket:" >> "$GITHUB_STEP_SUMMARY"
-
-            echo "test_state=IsSet" >> "$GITHUB_STATE"
-      - name: "Validate Test: Run a command in a public image"
-        run: |
-          test.sh equal   "$test_env"   "IsSet"
-          test.sh contains   "$PATH"   "IsSet"
-          test.sh equal   "${{ steps.test-runner-env.outputs.test_output }}"   "IsSet"
-
       - name: "Test: Multline script with defaults settings"
         id: test-defaults
         uses: ./
@@ -73,7 +55,6 @@ jobs:
             [ "${PWD}" != "/" ] && echo "ERROR: Workdir is not /" && exit 1
             # check if the container is attached to the local docker network:
             ping -c 1 nginx
-            
 
       - name: "Test: Multiline run fails on error (should have error)"
         continue-on-error: true
@@ -158,6 +139,28 @@ jobs:
           run: echo "test-var=${TEST_VAR}" >> $GITHUB_OUTPUT
       - name: "Validate Test: Options input"
         run: test.sh equal   "${{ steps.test-options-input.outputs.test-var }}"   "bar"
+
+      - name: "Test: Setting Environment Files (env, output, summary, path)"
+        id: test-runner-env
+        uses: ./
+        with:
+          image: ubuntu:latest
+          volumes: ${{ github.workspace }}:/workspace
+          run: |
+            echo "test_env=IsSet" >> "$GITHUB_ENV"
+            echo "test_path=/IsSet" >> "$GITHUB_PATH"
+            echo "test_output=IsSet" >> "$GITHUB_OUTPUT"
+
+            echo "### Step summary worked! :rocket:" >> "$GITHUB_STEP_SUMMARY"
+            test.sh contains   "$(cat $GITHUB_STEP_SUMMARY)"   worked
+            echo "test_state=IsSet" >> "$GITHUB_STATE"
+            test.sh contains   "$STATE_test_state"   worked
+
+      - name: "Validate Test: Setting Environment Files (env, output, summary, path)"
+        run: |
+          test.sh equal   "$test_env"   "IsSet"
+          test.sh contains   "$PATH"   "IsSet"
+          test.sh equal   "${{ steps.test-runner-env.outputs.test_output }}"   "IsSet"
       
       - name: Authorize docker for private image
         uses: docker/login-action@v3

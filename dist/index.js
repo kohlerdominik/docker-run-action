@@ -55,11 +55,7 @@ fileMap.pushRunnerPath('GITHUB_STEP_SUMMARY', process.env.GITHUB_STEP_SUMMARY);
 const command = fileMap.pushRunnerPath('CONTAINER_COMMAND', `${process.env.RUNNER_TEMP}/command_${(0, uuid_1.v4)()}`);
 function runContainer() {
     return __awaiter(this, void 0, void 0, function* () {
-        for (const item of fileMap.items.values()) {
-            fs.appendFileSync(item.runner.path, '');
-        }
         fs.writeFileSync(command.runner.path, input.get('run'), { mode: 0o755 });
-        core.info(fs.readdirSync('/home/runner/work/_temp/_runner_file_commands/').toString());
         core.info(`
 Wrote instruction file to "${command.runner.path}"
 with these instructions:

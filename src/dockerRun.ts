@@ -12,21 +12,18 @@ fileMap.pushRunnerPath('GITHUB_PATH', process.env.GITHUB_PATH)
 fileMap.pushRunnerPath('GITHUB_OUTPUT', process.env.GITHUB_OUTPUT)
 fileMap.pushRunnerPath('GITHUB_STATE', process.env.GITHUB_STATE)
 fileMap.pushRunnerPath('GITHUB_STEP_SUMMARY', process.env.GITHUB_STEP_SUMMARY)
+
+for (const item of fileMap.items.values()) {
+  fs.chmodSync(item.runner.path, 0o666)
+  fs.chownSync(item.runner.path, 0, 0)
+}
+
 const command = fileMap.pushRunnerPath(
   'CONTAINER_COMMAND',
   `${process.env.RUNNER_TEMP}/command_${uuidv4()}`
 )
 
 export async function runContainer(): Promise<void> {
-  for (const item of fileMap.items.values()) {
-    try {
-      fs.chmodSync(item.runner.path, 0o666)
-      fs.chownSync(item.runner.path, 0, 0)
-    } catch (e) {
-      // ignore errors if the file does not exist
-    }
-  }
-
   fs.writeFileSync(command!.runner.path, input.get('run'), {mode: 0o755})
   core.info(`
 Wrote instruction file to "${command!.runner.path}"

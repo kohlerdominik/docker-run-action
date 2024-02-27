@@ -57,7 +57,8 @@ function runContainer() {
     return __awaiter(this, void 0, void 0, function* () {
         for (const item of fileMap.items.values()) {
             try {
-                fs.chmodSync(item.runner.path, 0o777);
+                fs.chmodSync(item.runner.path, 0o666);
+                fs.chownSync(item.runner.path, 0, 0);
             }
             catch (e) {
                 // ignore errors if the file does not exist

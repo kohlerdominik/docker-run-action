@@ -20,7 +20,8 @@ const command = fileMap.pushRunnerPath(
 export async function runContainer(): Promise<void> {
   for (const item of fileMap.items.values()) {
     try {
-      fs.chmodSync(item.runner.path, 0o777)
+      fs.chmodSync(item.runner.path, 0o666)
+      fs.chownSync(item.runner.path, 0, 0)
     } catch (e) {
       // ignore errors if the file does not exist
     }

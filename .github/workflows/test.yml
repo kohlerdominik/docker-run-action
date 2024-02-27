@@ -34,9 +34,7 @@ jobs:
         uses: ./
         with:
           image: ubuntu:latest
-          tempdir: /tmp/github
-          run: |
-            echo "success=true" >> $GITHUB_OUTPUT
+          run: echo "success=true" >> $GITHUB_OUTPUT
       - name: "Validate Test: Run a command in a public image"
         run: test.sh equal   "${{ steps.test-simple.outputs.success }}"   "true"
 
@@ -127,6 +125,19 @@ jobs:
       - name: "Validate Test: Workdir input"
         run: test.sh equal   "${{ steps.test-workdir-input.outputs.file-content }}"   "present"
 
+      - name: "Test: Tempdir input"
+        id: test-tempdir-input
+        uses: ./
+        with:
+          image: ubuntu:latest
+          tempdir: "/var/mytemp"
+          run: |
+            ls command*
+            ls set_output*
+            ls a*
+      - name: "Validate Test: Workdir input"
+        run: test.sh equal   "${{ steps.test-workdir-input.outputs.file-content }}"   "present"
+
       - name: "Test: Options input"
         id: test-options-input
         uses: ./
@@ -146,7 +157,6 @@ jobs:
         with:
           image: ubuntu:latest
           volumes: ${{ github.workspace }}:/workspace
-          workdir: /workspace/tests
           run: |
             echo "test_env=IsSet" >> "$GITHUB_ENV"
             echo "test_path=/IsSet" >> "$GITHUB_PATH"

@@ -35,7 +35,6 @@ jobs:
         with:
           image: ubuntu:latest
           run: |
-            chown root:root /tmp/*
             echo "list temp: -----"
             ls -la /tmp 
             echo "var output: [$GITHUB_OUTPUT]"

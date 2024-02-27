@@ -7,11 +7,11 @@ import {FileMap, Mapping} from './fileMap'
 
 const fileMap = new FileMap(input.get('tempdir'))
 
-fileMap.pushRunnerPath('GITHUB_ENV', process.env.GITHUB_ENV)
+/*fileMap.pushRunnerPath('GITHUB_ENV', process.env.GITHUB_ENV)
 fileMap.pushRunnerPath('GITHUB_PATH', process.env.GITHUB_PATH)
 fileMap.pushRunnerPath('GITHUB_OUTPUT', process.env.GITHUB_OUTPUT)
 fileMap.pushRunnerPath('GITHUB_STATE', process.env.GITHUB_STATE)
-fileMap.pushRunnerPath('GITHUB_STEP_SUMMARY', process.env.GITHUB_STEP_SUMMARY)
+fileMap.pushRunnerPath('GITHUB_STEP_SUMMARY', process.env.GITHUB_STEP_SUMMARY)*/
 const command = fileMap.pushRunnerPath(
   'CONTAINER_COMMAND',
   `${process.env.RUNNER_TEMP}/command_${uuidv4()}`
@@ -22,7 +22,7 @@ export async function runContainer(): Promise<void> {
     try {
       fs.chmodSync(item.runner.path, 0o777)
     } catch (e) {
-      // ignore errors if the file does not exist (yet)
+      // ignore errors if the file does not exist
     }
   }
 
@@ -45,13 +45,14 @@ ${fs.readFileSync(command!.runner.path).toString()}
     // environment options
     ...input.getEnvironment(),
     ...fileMap.map(
-      (item: Mapping, key: string): string => `--env=${key}=${item.runner.path}`
+      (item: Mapping, key: string): string =>
+        `--env=${key}=${item.container.path}`
     ),
     // volume options
-    /*...fileMap.map(
+    ...fileMap.map(
       (item: Mapping): string =>
         `--volume=${item.runner.path}:${item.container.path}`
-    ),*/
+    ),
     ...input.getVolumes(),
     // other options
     ...input.getSplittet('options'),

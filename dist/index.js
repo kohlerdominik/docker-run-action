@@ -47,11 +47,11 @@ const uuid_1 = __nccwpck_require__(5840);
 const input = __importStar(__nccwpck_require__(8657));
 const fileMap_1 = __nccwpck_require__(9639);
 const fileMap = new fileMap_1.FileMap(input.get('tempdir'));
-fileMap.pushRunnerPath('GITHUB_ENV', process.env.GITHUB_ENV);
-fileMap.pushRunnerPath('GITHUB_PATH', process.env.GITHUB_PATH);
-fileMap.pushRunnerPath('GITHUB_OUTPUT', process.env.GITHUB_OUTPUT);
-fileMap.pushRunnerPath('GITHUB_STATE', process.env.GITHUB_STATE);
-fileMap.pushRunnerPath('GITHUB_STEP_SUMMARY', process.env.GITHUB_STEP_SUMMARY);
+/*fileMap.pushRunnerPath('GITHUB_ENV', process.env.GITHUB_ENV)
+fileMap.pushRunnerPath('GITHUB_PATH', process.env.GITHUB_PATH)
+fileMap.pushRunnerPath('GITHUB_OUTPUT', process.env.GITHUB_OUTPUT)
+fileMap.pushRunnerPath('GITHUB_STATE', process.env.GITHUB_STATE)
+fileMap.pushRunnerPath('GITHUB_STEP_SUMMARY', process.env.GITHUB_STEP_SUMMARY)*/
 const command = fileMap.pushRunnerPath('CONTAINER_COMMAND', `${process.env.RUNNER_TEMP}/command_${(0, uuid_1.v4)()}`);
 function runContainer() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -60,7 +60,7 @@ function runContainer() {
                 fs.chmodSync(item.runner.path, 0o777);
             }
             catch (e) {
-                // ignore errors if the file does not exist (yet)
+                // ignore errors if the file does not exist
             }
         }
         fs.writeFileSync(command.runner.path, input.get('run'), { mode: 0o755 });
@@ -80,12 +80,9 @@ ${fs.readFileSync(command.runner.path).toString()}
             ...(input.has('workdir') ? [`--workdir=${input.get('workdir')}`] : []),
             // environment options
             ...input.getEnvironment(),
-            ...fileMap.map((item, key) => `--env=${key}=${item.runner.path}`),
+            ...fileMap.map((item, key) => `--env=${key}=${item.container.path}`),
             // volume options
-            /*...fileMap.map(
-              (item: Mapping): string =>
-                `--volume=${item.runner.path}:${item.container.path}`
-            ),*/
+            ...fileMap.map((item) => `--volume=${item.runner.path}:${item.container.path}`),
             ...input.getVolumes(),
             // other options
             ...input.getSplittet('options'),

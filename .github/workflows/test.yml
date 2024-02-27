@@ -39,7 +39,7 @@ jobs:
         id: test-simple
         uses: ./
         with:
-          image: ubuntu:latest
+          image: alpine:latest
           run: |
             echo "list temp: -----"
             ls -la /tmp 

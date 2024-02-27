@@ -145,8 +145,8 @@ jobs:
         uses: ./
         with:
           image: ubuntu:latest
-          volumes: ${{ github.workspace }}:/workspace/tests
-          workdir: /workspace
+          volumes: ${{ github.workspace }}:/workspace
+          workdir: /workspace/tests
           run: |
             echo "test_env=IsSet" >> "$GITHUB_ENV"
             echo "test_path=/IsSet" >> "$GITHUB_PATH"

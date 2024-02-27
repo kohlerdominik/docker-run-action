@@ -14,6 +14,9 @@ case $1 in
   "equal")
     [ "${2}" == "${3}" ] && pass || fail
     ;;
+  "contains") # check whether first string contains second one
+    [[ "${2}" == *"${3}"* ]] && pass || fail
+    ;;
   "empty")
     [ -z "${2}" ] && pass || fail
     ;;

@@ -7,19 +7,6 @@ on: # rebuild any PRs and main branch changes
       - 'releases/*'
 
 jobs:
-  get-vars:
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-         echo "env: [$GITHUB_ENV]"
-         echo "path: [$GITHUB_PATH]"
-         echo "output: [$GITHUB_OUTPUT]"
-         echo "state: [$GITHUB_STATE]"
-         echo "summary: [$GITHUB_STEP_SUMMARY]"
-         echo "ls: -----"
-         ls /home/runner/work/_temp/_runner_file_commands
-         echo "printenv: -----"
-         printenv
   code-format: 
     name: Test code format
     runs-on: ubuntu-latest
@@ -47,9 +34,28 @@ jobs:
         uses: ./
         with:
           image: ubuntu:latest
-          run: echo "::set-output name=success::true"
+          run: echo "success=true" >> $GITHUB_OUTPUT
       - name: "Validate Test: Run a command in a public image"
         run: test.sh equal   "${{ steps.test-simple.outputs.success }}"   "true"
+
+      - name: "Test: Setting Environment Files (env, output, summary, path)"
+        id: test-runner-env
+        uses: ./
+        with:
+          image: ubuntu:latest
+          run: |
+            echo "test_env=IsSet" >> "$GITHUB_ENV"
+            echo "test_path=/IsSet" >> "$GITHUB_PATH"
+            echo "test_output=IsSet" >> "$GITHUB_OUTPUT"
+            echo "test_state=IsSet" >> "$GITHUB_STATE"
+            echo "test_step_summary=IsSet" >> "$GITHUB_STEP_SUMMARY"
+      - name: "Validate Test: Run a command in a public image"
+        run: |
+          test.sh equal   "$test_env"   "IsSet"
+          test.sh contains   "$PATH"   "IsSet"
+          test.sh equal   "${{ steps.test-runner-env.outputs.test_output }}"   "IsSet"
+          test.sh equal   "$STATE_test_state"   "IsSet"
+          test.sh contains   "$(echo $GITHUB_STEP_SUMMARY)"   "IsSet"
 
       - name: "Test: Multline script with defaults settings"
         id: test-defaults
@@ -76,9 +82,9 @@ jobs:
           image: ubuntu:latest
           run: |
             echo "start"
-            echo "::set-output name=beforeError::true"
+            echo "beforeError=true" >> $GITHUB_OUTPUT
             cat non-existing-file
-            echo "::set-output name=afterError::true"
+            echo "afterError=true" >> $GITHUB_OUTPUT
             echo "end"
       - name: "Validate Test: Multiline run fails on error"
         run: |
@@ -91,7 +97,7 @@ jobs:
         with:
           image: ubuntu:latest
           shell: /bin/bash
-          run: echo "::set-output name=bash-version::${BASH_VERSION}"
+          run: echo "bash-version=${BASH_VERSION}"  >> $GITHUB_OUTPUT
       - name: "Validate Test: Shell input"
         run: test.sh not-empty   "${{ steps.test-shell-input.outputs.bash-version }}"
 
@@ -104,8 +110,8 @@ jobs:
             GITHUB_JOB
             CUSTOM_VAR=foo
           run: |
-            echo "::set-output name=github-job::${GITHUB_JOB}"
-            echo "::set-output name=custom-var::${CUSTOM_VAR}"
+            echo "github-job=${GITHUB_JOB}" >> $GITHUB_OUTPUT
+            echo "custom-var=${CUSTOM_VAR}" >> $GITHUB_OUTPUT
       - name: "Validate Test: Env input"
         run: |
           test.sh equal   "${{ steps.test-env-input.outputs.github-job }}"   "${GITHUB_JOB}"
@@ -135,7 +141,7 @@ jobs:
           workdir: "/var/mywork"
           run: |
             echo "present" > /var/mywork/test-file
-            echo "::set-output name=file-content::$(cat ./test-file)"
+            echo "file-content=$(cat ./test-file)" >> $GITHUB_OUTPUT
       - name: "Validate Test: Workdir input"
         run: test.sh equal   "${{ steps.test-workdir-input.outputs.file-content }}"   "present"
 
@@ -148,7 +154,7 @@ jobs:
             --name=TestContainer
             --label test
             -e TEST_VAR=bar
-          run: echo "::set-output name=test-var::${TEST_VAR}"
+          run: echo "test-var=${TEST_VAR}" >> $GITHUB_OUTPUT
       - name: "Validate Test: Options input"
         run: test.sh equal   "${{ steps.test-options-input.outputs.test-var }}"   "bar"
       

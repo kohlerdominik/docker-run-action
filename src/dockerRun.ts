@@ -13,10 +13,10 @@ fileMap.pushRunnerPath('GITHUB_OUTPUT', process.env.GITHUB_OUTPUT)
 fileMap.pushRunnerPath('GITHUB_STATE', process.env.GITHUB_STATE)
 fileMap.pushRunnerPath('GITHUB_STEP_SUMMARY', process.env.GITHUB_STEP_SUMMARY)
 
-/*for (const item of fileMap.items.values()) {
+for (const item of fileMap.items.values()) {
   fs.chmodSync(item.runner.path, 0o666)
-  fs.chownSync(item.runner.path, 0, 0)
-}*/
+  //fs.chownSync(item.runner.path, 0, 0)
+}
 
 const command = fileMap.pushRunnerPath(
   'CONTAINER_COMMAND',

@@ -52,10 +52,10 @@ fileMap.pushRunnerPath('GITHUB_PATH', process.env.GITHUB_PATH);
 fileMap.pushRunnerPath('GITHUB_OUTPUT', process.env.GITHUB_OUTPUT);
 fileMap.pushRunnerPath('GITHUB_STATE', process.env.GITHUB_STATE);
 fileMap.pushRunnerPath('GITHUB_STEP_SUMMARY', process.env.GITHUB_STEP_SUMMARY);
-/*for (const item of fileMap.items.values()) {
-  fs.chmodSync(item.runner.path, 0o666)
-  fs.chownSync(item.runner.path, 0, 0)
-}*/
+for (const item of fileMap.items.values()) {
+    fs.chmodSync(item.runner.path, 0o666);
+    //fs.chownSync(item.runner.path, 0, 0)
+}
 const command = fileMap.pushRunnerPath('CONTAINER_COMMAND', `${process.env.RUNNER_TEMP}/command_${(0, uuid_1.v4)()}`);
 function runContainer() {
     return __awaiter(this, void 0, void 0, function* () {

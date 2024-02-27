@@ -18,6 +18,7 @@ const command = fileMap.pushRunnerPath(
 )
 
 export async function runContainer(): Promise<void> {
+  fileMap.items.forEach((items: Mapping) => fs.appendFile(items.runner.path, '', ()=>{},))
   fs.writeFileSync(command!.runner.path, input.get('run'), {mode: 0o755})
   core.info(`
 Wrote instruction file to "${command!.runner.path}"

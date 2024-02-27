@@ -80,9 +80,10 @@ ${fs.readFileSync(command.runner.path).toString()}
             ...(input.has('workdir') ? [`--workdir=${input.get('workdir')}`] : []),
             // environment options
             ...input.getEnvironment(),
-            ...fileMap.map((item, key) => `--env=${key}=${item.container.path}`),
+            ...fileMap.map((item, key) => `--env=${key}=${item.runner.path}`),
             // volume options
-            ...fileMap.map((item) => `--volume=${item.runner.path}:${item.container.path}`),
+            ...fileMap.map((item) => (item.runner ? '' : '') //`--volume=${item.runner.path}:${item.container.path}`
+            ),
             ...input.getVolumes(),
             // other options
             ...input.getSplittet('options'),

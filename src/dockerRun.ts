@@ -45,13 +45,11 @@ ${fs.readFileSync(command!.runner.path).toString()}
     // environment options
     ...input.getEnvironment(),
     ...fileMap.map(
-      (item: Mapping, key: string): string =>
-        `--env=${key}=${item.container.path}`
+      (item: Mapping, key: string): string => `--env=${key}=${item.runner.path}`
     ),
     // volume options
     ...fileMap.map(
-      (item: Mapping): string =>
-        `--volume=${item.runner.path}:${item.container.path}`
+      (item: Mapping): string => (item.runner ? '' : '') //`--volume=${item.runner.path}:${item.container.path}`
     ),
     ...input.getVolumes(),
     // other options

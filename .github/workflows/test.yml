@@ -40,7 +40,7 @@ jobs:
         uses: ./
         with:
           image: alpine:latest
-          tempdir: /home/temp
+          tempdir: /tmp/github
           run: |
             echo "list temp: -----"
             ls -la /tmp 

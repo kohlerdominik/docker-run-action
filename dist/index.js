@@ -56,7 +56,12 @@ const command = fileMap.pushRunnerPath('CONTAINER_COMMAND', `${process.env.RUNNE
 function runContainer() {
     return __awaiter(this, void 0, void 0, function* () {
         for (const item of fileMap.items.values()) {
-            fs.chmodSync(item.runner.path, 0o777);
+            try {
+                fs.chmodSync(item.runner.path, 0o777);
+            }
+            catch (e) {
+                // ignore errors if the file does not exist (yet)
+            }
         }
         fs.writeFileSync(command.runner.path, input.get('run'), { mode: 0o755 });
         core.info(`

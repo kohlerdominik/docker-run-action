@@ -82,8 +82,10 @@ ${fs.readFileSync(command.runner.path).toString()}
             ...input.getEnvironment(),
             ...fileMap.map((item, key) => `--env=${key}=${item.runner.path}`),
             // volume options
-            ...fileMap.map((item) => (item.runner ? '' : '') //`--volume=${item.runner.path}:${item.container.path}`
-            ),
+            /*...fileMap.map(
+              (item: Mapping): string =>
+                `--volume=${item.runner.path}:${item.container.path}`
+            ),*/
             ...input.getVolumes(),
             // other options
             ...input.getSplittet('options'),

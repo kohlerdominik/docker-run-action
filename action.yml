@@ -31,7 +31,7 @@ inputs:
   tempdir:
     required: false
     description: 'Custom tempdir'
-    default: /tmp
+    default: /tmp/_action
   options:
     required: false
     description: 'Additional run options'

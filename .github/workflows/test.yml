@@ -12,7 +12,7 @@ jobs:
     steps:
       - run: |
          echo "env: [$GITHUB_ENV]"
-         echo "path: [GITHUB_PATH]"
+         echo "path: [$GITHUB_PATH]"
          echo "output: [$GITHUB_OUTPUT]"
          echo "state: [$GITHUB_STATE]"
          echo "summary: [$GITHUB_STEP_SUMMARY]"

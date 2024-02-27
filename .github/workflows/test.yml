@@ -16,6 +16,7 @@ jobs:
          echo "output: [$GITHUB_OUTPUT]"
          echo "state: [$GITHUB_STATE]"
          echo "summary: [$GITHUB_STEP_SUMMARY]"
+         ls /home/runner/work/_temp/_runner_file_commands
   code-format: 
     name: Test code format
     runs-on: ubuntu-latest

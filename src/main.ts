@@ -10,7 +10,7 @@ async function run(): Promise<void> {
       throw new Error('This actions works only on linux platform.')
     }
   } catch (error) {
-    core.setFailed(error.message)
+    core.setFailed(error instanceof Error ? error.message : 'Unkown error')
   }
 }
 

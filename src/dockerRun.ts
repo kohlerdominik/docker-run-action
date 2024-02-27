@@ -54,9 +54,9 @@ ${fs.readFileSync(command!.runner.path).toString()}
     ...input.getVolumes(),
     // other options
     ...input.getSplittet('options'),
+    '--privileged',
     input.get('image'),
     input.get('shell'),
-    '--privileged',
     '-e',
     command!.container.path
   ])

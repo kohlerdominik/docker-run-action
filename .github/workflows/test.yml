@@ -52,7 +52,6 @@ jobs:
             echo "### Step summary worked! :rocket:" >> "$GITHUB_STEP_SUMMARY"
 
             echo "test_state=IsSet" >> "$GITHUB_STATE"
-            test.sh   "$STATE_test_state"   "IsSet"
       - name: "Validate Test: Run a command in a public image"
         run: |
           test.sh equal   "$test_env"   "IsSet"

@@ -34,7 +34,9 @@ jobs:
         uses: ./
         with:
           image: ubuntu:latest
-          run: ls -la /tmp #echo "success=true" >> $GITHUB_OUTPUT
+          run: | 
+            ls -la /tmp 
+            echo "success=true" >> $GITHUB_OUTPUT
       - name: "Validate Test: Run a command in a public image"
         run: test.sh equal   "${{ steps.test-simple.outputs.success }}"   "true"
 

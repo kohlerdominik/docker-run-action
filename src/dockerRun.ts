@@ -18,6 +18,10 @@ const command = fileMap.pushRunnerPath(
 )
 
 export async function runContainer(): Promise<void> {
+  for (const item of fileMap.items.values()) {
+    fs.chmodSync(item.runner.path, 0o777)
+  }
+
   fs.writeFileSync(command!.runner.path, input.get('run'), {mode: 0o755})
   core.info(`
 Wrote instruction file to "${command!.runner.path}"

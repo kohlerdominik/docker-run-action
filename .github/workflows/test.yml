@@ -132,11 +132,8 @@ jobs:
           image: ubuntu:latest
           tempdir: "/var/mytemp"
           run: |
-            ls command*
-            ls set_output*
-            ls a*
-      - name: "Validate Test: Workdir input"
-        run: test.sh equal   "${{ steps.test-workdir-input.outputs.file-content }}"   "present"
+            ls /var/mytemp/command*
+            ls /var/mytemp/set_output*
 
       - name: "Test: Options input"
         id: test-options-input

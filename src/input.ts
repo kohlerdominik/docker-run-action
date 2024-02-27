@@ -27,3 +27,7 @@ export function getEnvironment(): string[] {
 export function getVolumes(): string[] {
   return getSplittet('volumes').map((volume: string) => `--volume=${volume}`)
 }
+
+export function getTempDir(): string {
+  return get('tempDir')
+}

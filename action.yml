@@ -27,7 +27,11 @@ inputs:
     description: 'Custom volume mounts'
   workdir: 
     required: false
-    description: "Custom workdir"
+    description: 'Custom workdir'
+  tempdir:
+    required: false
+    description: 'Custom tempdir'
+    default: /tmp/_action
   options:
     required: false
     description: 'Additional run options'

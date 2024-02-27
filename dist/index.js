@@ -39,24 +39,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.runContainer = exports.CONTAINER_COMMAND_PATH = exports.LOCAL_COMMAND_PATH = exports.COMMAND_FILE_NAME = void 0;
+exports.runContainer = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
 const fs = __importStar(__nccwpck_require__(7147));
 const uuid_1 = __nccwpck_require__(5840);
 const input = __importStar(__nccwpck_require__(8657));
-exports.COMMAND_FILE_NAME = `${(0, uuid_1.v4)()}.sh`;
-exports.LOCAL_COMMAND_PATH = `${process.env.RUNNER_TEMP}/${exports.COMMAND_FILE_NAME}`;
-exports.CONTAINER_COMMAND_PATH = `/tmp/${exports.COMMAND_FILE_NAME}`;
+const fileMap_1 = __nccwpck_require__(9639);
 function runContainer() {
     return __awaiter(this, void 0, void 0, function* () {
-        fs.writeFileSync(exports.LOCAL_COMMAND_PATH, input.get('run'), { mode: 0o755 });
+        // prepare the files for the command
+        const fileMap = new fileMap_1.FileMap(input.get('tempdir'));
+        fileMap.pushRunnerPath('GITHUB_ENV', process.env.GITHUB_ENV);
+        fileMap.pushRunnerPath('GITHUB_PATH', process.env.GITHUB_PATH);
+        fileMap.pushRunnerPath('GITHUB_OUTPUT', process.env.GITHUB_OUTPUT);
+        fileMap.pushRunnerPath('GITHUB_STATE', process.env.GITHUB_STATE);
+        fileMap.pushRunnerPath('GITHUB_STEP_SUMMARY', process.env.GITHUB_STEP_SUMMARY);
+        const command = fileMap.pushRunnerPath('CONTAINER_COMMAND', `${process.env.RUNNER_TEMP}/command_${(0, uuid_1.v4)()}`);
+        fs.writeFileSync(command.runner.path, input.get('run'), { mode: 0o755 });
         core.info(`
-Wrote instruction file to "${exports.LOCAL_COMMAND_PATH}"
+Wrote instruction file to "${command.runner.path}"
 with these instructions:
 ----- START OF FILE -----
-${fs.readFileSync(exports.LOCAL_COMMAND_PATH).toString()}
+${fs.readFileSync(command.runner.path).toString()}
 ----- END OF FILE -----`);
+        // run the command
         yield exec.exec('docker', [
             `run`,
             // default network
@@ -67,19 +74,65 @@ ${fs.readFileSync(exports.LOCAL_COMMAND_PATH).toString()}
             ...(input.has('workdir') ? [`--workdir=${input.get('workdir')}`] : []),
             // environment options
             ...input.getEnvironment(),
+            ...fileMap.map((item, key) => `--env=${key}=${item.container.path}`),
             // volume options
-            `--volume=${exports.LOCAL_COMMAND_PATH}:${exports.CONTAINER_COMMAND_PATH}`,
+            ...fileMap.map((item) => `--volume=${item.runner.path}:${item.container.path}`),
             ...input.getVolumes(),
             // other options
             ...input.getSplittet('options'),
             input.get('image'),
             input.get('shell'),
             '-e',
-            exports.CONTAINER_COMMAND_PATH
+            command.container.path
         ]);
     });
 }
 exports.runContainer = runContainer;
+
+
+/***/ }),
+
+/***/ 9639:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileMap = void 0;
+class FileMap {
+    constructor(containerTempDir) {
+        this.items = new Map();
+        this.containerTempDir = containerTempDir.endsWith('/')
+            ? containerTempDir
+            : `${containerTempDir}/`;
+    }
+    map(callbackfn) {
+        return Array.from(this.items.entries()).map(([key, value]) => callbackfn(value, key));
+    }
+    pushRunnerPath(key, runnerPath) {
+        if (typeof runnerPath === 'string' && runnerPath.length > 0) {
+            const mapping = this.runnerPathToMapping(runnerPath);
+            this.items.set(key, mapping);
+        }
+        return this.items.get(key);
+    }
+    runnerPathToMapping(runnerPath) {
+        const runner = this.pathToFile(runnerPath);
+        const container = {
+            dir: this.containerTempDir,
+            file: runner.file,
+            path: this.containerTempDir + runner.file
+        };
+        return { runner, container };
+    }
+    pathToFile(path) {
+        const lastSlashIndex = path.lastIndexOf('/');
+        const dir = path.substring(0, lastSlashIndex);
+        const file = path.substring(lastSlashIndex + 1);
+        return { path, dir, file };
+    }
+}
+exports.FileMap = FileMap;
 
 
 /***/ }),
@@ -113,7 +166,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getVolumes = exports.getEnvironment = exports.getSplittet = exports.get = exports.has = void 0;
+exports.getTempDir = exports.getVolumes = exports.getEnvironment = exports.getSplittet = exports.get = exports.has = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const required = ['image', 'run'];
 function has(name) {
@@ -140,6 +193,10 @@ function getVolumes() {
     return getSplittet('volumes').map((volume) => `--volume=${volume}`);
 }
 exports.getVolumes = getVolumes;
+function getTempDir() {
+    return get('tempDir');
+}
+exports.getTempDir = getTempDir;
 
 
 /***/ }),

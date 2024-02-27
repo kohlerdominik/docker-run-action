@@ -3,20 +3,31 @@ import * as exec from '@actions/exec'
 import * as fs from 'fs'
 import {v4 as uuidv4} from 'uuid'
 import * as input from './input'
-
-export const COMMAND_FILE_NAME = `${uuidv4()}.sh`
-export const LOCAL_COMMAND_PATH = `${process.env.RUNNER_TEMP}/${COMMAND_FILE_NAME}`
-export const CONTAINER_COMMAND_PATH = `/tmp/${COMMAND_FILE_NAME}`
+import {FileMap, Mapping} from './fileMap'
 
 export async function runContainer(): Promise<void> {
-  fs.writeFileSync(LOCAL_COMMAND_PATH, input.get('run'), {mode: 0o755})
+  // prepare the files for the command
+  const fileMap = new FileMap(input.get('tempdir'))
+
+  fileMap.pushRunnerPath('GITHUB_ENV', process.env.GITHUB_ENV)
+  fileMap.pushRunnerPath('GITHUB_PATH', process.env.GITHUB_PATH)
+  fileMap.pushRunnerPath('GITHUB_OUTPUT', process.env.GITHUB_OUTPUT)
+  fileMap.pushRunnerPath('GITHUB_STATE', process.env.GITHUB_STATE)
+  fileMap.pushRunnerPath('GITHUB_STEP_SUMMARY', process.env.GITHUB_STEP_SUMMARY)
+  const command = fileMap.pushRunnerPath(
+    'CONTAINER_COMMAND',
+    `${process.env.RUNNER_TEMP}/command_${uuidv4()}`
+  )
+
+  fs.writeFileSync(command!.runner.path, input.get('run'), {mode: 0o755})
   core.info(`
-Wrote instruction file to "${LOCAL_COMMAND_PATH}"
+Wrote instruction file to "${command!.runner.path}"
 with these instructions:
 ----- START OF FILE -----
-${fs.readFileSync(LOCAL_COMMAND_PATH).toString()}
+${fs.readFileSync(command!.runner.path).toString()}
 ----- END OF FILE -----`)
 
+  // run the command
   await exec.exec('docker', [
     `run`,
     // default network
@@ -27,14 +38,21 @@ ${fs.readFileSync(LOCAL_COMMAND_PATH).toString()}
     ...(input.has('workdir') ? [`--workdir=${input.get('workdir')}`] : []),
     // environment options
     ...input.getEnvironment(),
+    ...fileMap.map(
+      (item: Mapping, key: string): string =>
+        `--env=${key}=${item.container.path}`
+    ),
     // volume options
-    `--volume=${LOCAL_COMMAND_PATH}:${CONTAINER_COMMAND_PATH}`,
+    ...fileMap.map(
+      (item: Mapping): string =>
+        `--volume=${item.runner.path}:${item.container.path}`
+    ),
     ...input.getVolumes(),
     // other options
     ...input.getSplittet('options'),
     input.get('image'),
     input.get('shell'),
     '-e',
-    CONTAINER_COMMAND_PATH
+    command!.container.path
   ])
 }

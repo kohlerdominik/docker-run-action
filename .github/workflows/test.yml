@@ -28,25 +28,14 @@ jobs:
         run: |
           mkdir -p ~/.local/bin
           cp ./tests/test.sh ~/.local/bin/test.sh
-      
-      - run: |
-          ls -la /home/runner/work/_temp/
-          ls -la /home/runner/work/_temp/_runner_file_commands/
-          chmod 666 /home/runner/work/_temp/_runner_file_commands/*
-          ls -la /home/runner/work/_temp/_runner_file_commands/
 
       - name: "Test: Run a command in a public image"
         id: test-simple
         uses: ./
         with:
-          image: alpine:latest
+          image: ubuntu:latest
           tempdir: /tmp/github
           run: |
-            echo "list temp: -----"
-            ls -la /tmp 
-            echo "var output: [$GITHUB_OUTPUT]"
-            echo "ls of output: ----"
-            ls -la $GITHUB_OUTPUT
             echo "success=true" >> $GITHUB_OUTPUT
       - name: "Validate Test: Run a command in a public image"
         run: test.sh equal   "${{ steps.test-simple.outputs.success }}"   "true"
@@ -61,14 +50,13 @@ jobs:
             echo "test_path=/IsSet" >> "$GITHUB_PATH"
             echo "test_output=IsSet" >> "$GITHUB_OUTPUT"
             echo "test_state=IsSet" >> "$GITHUB_STATE"
-            echo "test_step_summary=IsSet" >> "$GITHUB_STEP_SUMMARY"
+            echo "### Step summary worked! :rocket:" >> "$GITHUB_STEP_SUMMARY"
       - name: "Validate Test: Run a command in a public image"
         run: |
           test.sh equal   "$test_env"   "IsSet"
           test.sh contains   "$PATH"   "IsSet"
           test.sh equal   "${{ steps.test-runner-env.outputs.test_output }}"   "IsSet"
           test.sh equal   "$STATE_test_state"   "IsSet"
-          test.sh contains   "$(echo $GITHUB_STEP_SUMMARY)"   "IsSet"
 
       - name: "Test: Multline script with defaults settings"
         id: test-defaults

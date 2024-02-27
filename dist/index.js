@@ -82,7 +82,7 @@ ${fs.readFileSync(command.runner.path).toString()}
             ...input.getVolumes(),
             // other options
             ...input.getSplittet('options'),
-            '--privileged',
+            '--cap-add=DAC_OVERRIDE',
             input.get('image'),
             input.get('shell'),
             '-e',

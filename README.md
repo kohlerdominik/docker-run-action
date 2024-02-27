@@ -51,6 +51,20 @@ See also [Docker Login Action](https://github.com/marketplace/actions/docker-log
 ```
 See also [Docker Push Action](https://github.com/marketplace/actions/build-and-push-docker-images)
 
+### Use Github Environment Files
+```yaml
+- uses: kohlerdominik/docker-run-action@v1
+  with:
+    image: ubuntu:latest
+    volumes: ${{ github.workspace }}:/workspace
+    run: |
+      echo "MY_VARIABLE=Hello World" >> "$GITHUB_ENV"
+      echo "result=success" >> "$GITHUB_OUTPUT"
+
+      echo "### We did it! :rocket:" >> "$GITHUB_STEP_SUMMARY"     
+```
+See also [Environment Files](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#environment-files)
+
 ### Customize the action
 ```yaml
 - uses: kohlerdominik/docker-run-action@v1
@@ -61,6 +75,8 @@ See also [Docker Push Action](https://github.com/marketplace/actions/build-and-p
     shell: /bin/bash
    # change workdir (default directory for the shell)
     workdir: /workspace
+   # change tempdir (do this only for very good reason)
+   tempdir: /tmp/_action
    # pass or create environment variables
     environment: |
       GITHUB_REF

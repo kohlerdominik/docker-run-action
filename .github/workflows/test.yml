@@ -7,6 +7,15 @@ on: # rebuild any PRs and main branch changes
       - 'releases/*'
 
 jobs:
+  get-vars:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+         echo "env: [$GITHUB_ENV]"
+         echo "path: [GITHUB_PATH]"
+         echo "output: [$GITHUB_OUTPUT]"
+         echo "state: [$GITHUB_STATE]"
+         echo "summary: [$GITHUB_STEP_SUMMARY]"
   code-format: 
     name: Test code format
     runs-on: ubuntu-latest

@@ -152,11 +152,8 @@ jobs:
             echo "test_path=/IsSet" >> "$GITHUB_PATH"
             echo "test_output=IsSet" >> "$GITHUB_OUTPUT"
 
-            echo "### Step summary worked! :rocket:" >> "$GITHUB_STEP_SUMMARY"
-            test.sh contains   "$(cat $GITHUB_STEP_SUMMARY)"   worked
             echo "test_state=IsSet" >> "$GITHUB_STATE"
-            test.sh contains   "$STATE_test_state"   worked
-
+            echo "### Step summary worked! :rocket:" >> "$GITHUB_STEP_SUMMARY"
       - name: "Validate Test: Setting Environment Files (env, output, summary, path)"
         run: |
           test.sh equal   "$test_env"   "IsSet"

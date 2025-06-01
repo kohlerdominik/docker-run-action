@@ -89,13 +89,16 @@ jobs:
           environment: |
             GITHUB_JOB
             CUSTOM_VAR=foo
+            ESCAPED_VAR="double \" quote"
           run: |
             echo "github-job=${GITHUB_JOB}" >> $GITHUB_OUTPUT
             echo "custom-var=${CUSTOM_VAR}" >> $GITHUB_OUTPUT
+            echo "escaped-var=${ESCAPED_VAR}" >> $GITHUB_OUTPUT
       - name: "Validate Test: Env input"
         run: |
           test.sh equal   "${{ steps.test-env-input.outputs.github-job }}"   "${GITHUB_JOB}"
           test.sh equal   "${{ steps.test-env-input.outputs.custom-var }}"   "foo"
+          test.sh equal   "${{ steps.test-env-input.outputs.escaped-var }}"   "double \" quote"
 
       - name: "Test: Volume input"
         id: test-volume-input

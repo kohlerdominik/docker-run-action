@@ -180,9 +180,7 @@ function get(name) {
 }
 exports.get = get;
 function getSplittet(name) {
-    return get(name)
-        .split(/[\s]+/)
-        .filter((instruction) => !!instruction);
+    return (get(name).match(/(?:[^\s"]+|"[^"]*(?:\\.[^"]*)*")+/g) || []).filter(Boolean);
 }
 exports.getSplittet = getSplittet;
 function getEnvironment() {

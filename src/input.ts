@@ -13,9 +13,9 @@ export function get(name: string): string {
 }
 
 export function getSplittet(name: string): string[] {
-  return get(name)
-    .split(/[\s]+/)
-    .filter((instruction: string) => !!instruction)
+  return (get(name).match(/(?:[^\s"]+|"[^"]*(?:\\.[^"]*)*")+/g) || []).filter(
+    Boolean
+  )
 }
 
 export function getEnvironment(): string[] {

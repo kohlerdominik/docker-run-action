@@ -23,7 +23,7 @@ Run a step in a (private) container.
 
 ### Run a step in a private image
 ```yaml
-- uses: docker/login-action@v1
+- uses: docker/login-action@v3
   with:
     registry: ghcr.io
     username: ${{ secrets.MY_USERNAME }}
@@ -40,7 +40,7 @@ See also [Docker Login Action](https://github.com/marketplace/actions/docker-log
 
 ### Run an image built by a previous step:
 ```yaml
-- uses: docker/build-push-action@v2
+- uses: docker/build-push-action@v6
   with:
     tags: application:latest
     push: false

@@ -30821,13 +30821,13 @@ function info(message) {
  * @param name The name of the output group
  */
 function startGroup(name) {
-    issue('group', name);
+    command_issue('group', name);
 }
 /**
  * End an output group.
  */
 function endGroup() {
-    issue('endgroup');
+    command_issue('endgroup');
 }
 /**
  * Wrap an asynchronous function call in a group.
@@ -31064,14 +31064,9 @@ async function runContainer() {
     fileMap.pushRunnerPath('GITHUB_STEP_SUMMARY', process.env.GITHUB_STEP_SUMMARY);
     const command = fileMap.pushRunnerPath('CONTAINER_COMMAND', `${process.env.RUNNER_TEMP}/command_${dist_node_v4()}`);
     external_fs_namespaceObject.writeFileSync(command.runner.path, get('run'), { mode: 0o755 });
-    info(`
-Wrote instruction file to "${command.runner.path}"
-with these instructions:
------ START OF FILE -----
-${external_fs_namespaceObject.readFileSync(command.runner.path).toString()}
------ END OF FILE -----`);
-    // run the command
-    await exec_exec('docker', [
+    await group(`Instruction file "${command.runner.path}"`, async () => info(external_fs_namespaceObject.readFileSync(command.runner.path).toString()));
+    await pullImageIfMissing(get('image'));
+    const args = [
         `run`,
         // default network
         ...(has('default_network')
@@ -31091,7 +31086,35 @@ ${external_fs_namespaceObject.readFileSync(command.runner.path).toString()}
         get('shell'),
         '-e',
         command.container.path
-    ]);
+    ];
+    await group('Docker command', async () => info(['docker', ...args].join(' ')));
+    // exec.exec always echoes the full command line ("[command]/usr/bin/docker run ...")
+    // and offers no way to suppress only that echo. We already logged the command in
+    // the collapsible group above, so run silently and forward the container's
+    // stdout/stderr ourselves. This keeps the user's output streaming and ungrouped,
+    // so their own ::group:: markers still work.
+    await exec_exec('docker', args, {
+        silent: true,
+        listeners: {
+            stdout: (data) => process.stdout.write(data),
+            stderr: (data) => process.stderr.write(data)
+        }
+    });
+}
+// Mirrors docker run's default pull policy (pull only when the image is missing
+// locally) so images built earlier in the job without being pushed keep working.
+// Pulling here instead of letting docker run do it lets us collapse the pull output.
+async function pullImageIfMissing(image) {
+    // inspect prints the image's full JSON on success, hence silent
+    const inspect = await exec_exec('docker', ['image', 'inspect', image], {
+        silent: true,
+        ignoreReturnCode: true
+    });
+    if (inspect === 0) {
+        info(`Image "${image}" found locally, skipping pull`);
+        return;
+    }
+    await group(`Pull image "${image}"`, async () => exec_exec('docker', ['pull', image]));
 }
 
 ;// CONCATENATED MODULE: ./lib/main.js

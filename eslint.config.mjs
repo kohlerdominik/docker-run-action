@@ -54,6 +54,7 @@ export default [
         },
         rules: {
             "eslint-comments/no-use": "off",
+            "i18n-text/no-en": "off",
             "import/no-namespace": "off",
             "import/no-unresolved": "off",
             "no-unused-vars": "off",
